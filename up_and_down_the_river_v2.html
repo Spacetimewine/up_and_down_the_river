@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up and Down the River</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #game-area {
+            margin: 20px;
+        }
+        .card {
+            display: inline-block;
+            width: 80px;
+            height: 120px;
+            border: 1px solid black;
+            text-align: center;
+            line-height: 120px;
+            font-size: 20px;
+            margin: 5px;
+            background-color: white;
+        }
+        .red {
+            color: red;
+        }
+        .small-text {
+            font-size: 14px;
+        }
+        .error-message {
+            color: red; /* Ensure error messages are red */
+        }
+    </style>
+</head>
+<body>
+    <h1>Up and Down the River</h1>
+    <h3>A high/low guessing card game.</h3>
+    <h3>Each correct guess scores 1 point. 8 points wins the game!</h3>
+    <button onclick="startGame()">Start Game</button>
+    <div id="game-area">
+        <h2 class="small-text">Will the next card be higher or lower? (Ace is high)</h2>
+        <div id="seed-card"></div>
+        <div id="match-cards"></div>
+        <div id="wrong-card"></div>
+        <button onclick="makeGuess('higher')">Higher</button>
+        <button onclick="makeGuess('lower')">Lower</button>
+        <h2>Score: <span id="score">0</span></h2>
+        <h2 id="game-message" class="error-message"></h2> <!-- Make sure error message uses this class -->
+    </div>
+
+    <script>
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        let deck = [];
+        let seedCard = null;
+        let matchCount = 0;
+        let score = 0;
+        let gameOver = false;
+
+        function createDeck() {
+            deck = [];
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({ rank, suit });
+                }
+            }
+            deck = shuffle(deck);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            createDeck();
+            score = 0;
+            matchCount = 0;
+            gameOver = false;
+            document.getElementById("score").innerText = score;
+            document.getElementById("game-message").innerText = "";
+            document.getElementById("match-cards").innerHTML = "";
+            document.getElementById("wrong-card").innerHTML = "";
+            seedCard = drawCard();
+            updateUI();
+        }
+
+        function drawCard() {
+            return deck.length > 0 ? deck.pop() : null;
+        }
+
+        function getCardValue(card) {
+            return ranks.indexOf(card.rank);
+        }
+
+        function makeGuess(guess) {
+            if (!seedCard || gameOver) return;
+            let newCard = drawCard();
+            if (!newCard) return;
+
+            let seedValue = getCardValue(seedCard);
+            let newValue = getCardValue(newCard);
+
+            if (newValue === seedValue) {
+                matchCount++;
+                document.getElementById("match-cards").innerHTML += `<div class='card' style='color: ${(newCard.suit === '♥' || newCard.suit === '♦') ? "red" : "black"};'>${newCard.rank}${newCard.suit}</div>`;
+                document.getElementById("game-message").innerText = "Match! - Guess again!";
+                seedCard = newCard;
+                updateUI();
+                return;
+            }
+
+            let isCorrect = (guess === 'higher' && newValue > seedValue) || (guess === 'lower' && newValue < seedValue);
+            if (isCorrect) {
+                score += (matchCount + 1);
+                matchCount = 0;
+                document.getElementById("score").innerText = score;
+                document.getElementById("match-cards").innerHTML = "";
+                document.getElementById("game-message").innerText = "";
+                seedCard = newCard;
+                document.getElementById("wrong-card").innerHTML = "";
+                updateUI();
+                if (score >= 8) {
+                    document.getElementById("game-message").innerText = "Congratulations! You Won!";
+                    gameOver = true;
+                }
+            } else {
+                document.getElementById("game-message").innerText = "Sorry, you guessed wrong - try again!";
+                document.getElementById("wrong-card").innerHTML = `<div class='card' style='color: ${(newCard.suit === '♥' || newCard.suit === '♦') ? "red" : "black"};'>${newCard.rank}${newCard.suit}</div>`;
+                gameOver = true;
+            }
+        }
+
+        function updateUI() {
+            let isRed = (seedCard.suit === '♥' || seedCard.suit === '♦');
+            document.getElementById("seed-card").innerHTML = `<div class='card' style='color: ${isRed ? "red" : "black"};'>${seedCard.rank}${seedCard.suit}</div>`;
+        }
+    </script>
+</body>
+</html>
