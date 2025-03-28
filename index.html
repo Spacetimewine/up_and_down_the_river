@@ -26,11 +26,14 @@
         .red {
             color: red;
         }
+        .blue {
+            color: blue;
+        }
+        .green {
+            color: green;
+        }
         .small-text {
             font-size: 14px;
-        }
-        .error-message {
-            color: red; /* Ensure error messages are red */
         }
     </style>
 </head>
@@ -47,7 +50,7 @@
         <button onclick="makeGuess('higher')">Higher</button>
         <button onclick="makeGuess('lower')">Lower</button>
         <h2>Score: <span id="score">0</span></h2>
-        <h2 id="game-message" class="error-message"></h2>
+        <h2 id="game-message"></h2>
     </div>
 
     <script>
@@ -84,6 +87,7 @@
             gameOver = false;
             document.getElementById("score").innerText = score;
             document.getElementById("game-message").innerText = "";
+            document.getElementById("game-message").className = "";
             document.getElementById("match-cards").innerHTML = "";
             document.getElementById("wrong-card").innerHTML = "";
             seedCard = drawCard();
@@ -110,6 +114,7 @@
                 matchCount++;
                 document.getElementById("match-cards").innerHTML += `<div class='card' style='color: ${(newCard.suit === '♥' || newCard.suit === '♦') ? "red" : "black"};'>${newCard.rank}${newCard.suit}</div>`;
                 document.getElementById("game-message").innerText = "Match! - Guess again!";
+                document.getElementById("game-message").className = "blue";
                 seedCard = newCard;
                 updateUI();
                 return;
@@ -122,15 +127,18 @@
                 document.getElementById("score").innerText = score;
                 document.getElementById("match-cards").innerHTML = "";
                 document.getElementById("game-message").innerText = "";
+                document.getElementById("game-message").className = "";
                 seedCard = newCard;
                 document.getElementById("wrong-card").innerHTML = "";
                 updateUI();
                 if (score >= 8) {
                     document.getElementById("game-message").innerText = "Congratulations! You Won!";
+                    document.getElementById("game-message").className = "green";
                     gameOver = true;
                 }
             } else {
                 document.getElementById("game-message").innerText = "Sorry, you guessed wrong - try again!";
+                document.getElementById("game-message").className = "red";
                 document.getElementById("wrong-card").innerHTML = `<div class='card' style='color: ${(newCard.suit === '♥' || newCard.suit === '♦') ? "red" : "black"};'>${newCard.rank}${newCard.suit}</div>`;
                 gameOver = true;
             }
